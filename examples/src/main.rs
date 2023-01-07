@@ -1,8 +1,43 @@
 use momento::response::cache_get_response::MomentoGetStatus;
-use momento::simple_cache_client::SimpleCacheClientBuilder;
-use std::env;
+use momento::simple_cache_client::{SimpleCacheClient, SimpleCacheClientBuilder};
+use std::{env, thread, time};
 use std::num::NonZeroU64;
 use std::process;
+use std::str;
+use std::str::Utf8Error;
+
+async fn do_get_set(cache_client: &mut SimpleCacheClient) {
+    let cache_name = "tacocache";
+
+    // Sets key with default TTL and get value with that key
+    let key = String::from("my_key");
+    let value = String::from("my_value");
+
+    match cache_client
+        .set(&cache_name, key.clone(), value.clone(), None)
+        .await
+    {
+        Ok(_) => {}
+        Err(err) => {
+            eprintln!("{}", err);
+        }
+    };
+
+    match cache_client.get(&cache_name, key.clone()).await {
+        Ok(r) => match r.result {
+            MomentoGetStatus::HIT => match str::from_utf8(&r.value) {
+                Ok(s) => println!("cache hit! result: {}", s),
+                Err(_) => println!("Error converting result to utf-8 string!")
+            }
+            MomentoGetStatus::MISS => println!("cache miss"),
+            _ => println!("error occurred"),
+        },
+        Err(err) => {
+            eprintln!("{}", err);
+        }
+    };
+
+}
 
 #[tokio::main]
 async fn main() {
@@ -22,67 +57,8 @@ async fn main() {
     }
     .build();
 
-    // Creating a cache named "cache"
-    let cache_name = String::from("cache");
-    match cache_client.create_cache(&cache_name).await {
-        Ok(_) => {}
-        Err(err) => {
-            eprintln!("{}", err);
-        }
-    }
-
-    // List the caches
-    println!("Listing caches:");
-    let mut next_token: Option<String> = None;
-    loop {
-        next_token = match cache_client.list_caches(next_token).await {
-            Ok(list_cache_result) => {
-                for listed_cache in list_cache_result.caches {
-                    println!("{}", listed_cache.cache_name);
-                }
-                list_cache_result.next_token
-            }
-            Err(err) => {
-                eprintln!("{}", err);
-                break;
-            }
-        };
-        if next_token.is_none() {
-            break;
-        }
-    }
-    println!();
-
-    // Sets key with default TTL and get value with that key
-    let key = String::from("my_key");
-    let value = String::from("my_value");
-    println!("Setting key: {}, value: {}", key, value);
-    match cache_client
-        .set(&cache_name, key.clone(), value.clone(), None)
-        .await
-    {
-        Ok(_) => {}
-        Err(err) => {
-            eprintln!("{}", err);
-        }
-    };
-    match cache_client.get(&cache_name, key.clone()).await {
-        Ok(r) => match r.result {
-            MomentoGetStatus::HIT => println!("cache hit!"),
-            MomentoGetStatus::MISS => println!("cache miss"),
-            _ => println!("error occurred"),
-        },
-        Err(err) => {
-            eprintln!("{}", err);
-        }
-    };
-    // Permanently deletes cache
-    match cache_client.delete_cache(&cache_name).await {
-        Ok(_) => {
-            println!("Permanently deleted cache named, {}", cache_name);
-        }
-        Err(err) => {
-            eprintln!("{}", err);
-        }
-    };
+    do_get_set(&mut cache_client).await;
+    println!("Sleeping for 6 minutes to try to trigger NLB idle timeout");
+    thread::sleep(time::Duration::from_secs(6 * 60));
+    do_get_set(&mut cache_client).await;
 }
