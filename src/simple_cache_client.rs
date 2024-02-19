@@ -9,22 +9,22 @@ use momento_protos::{
     },
 };
 use serde_json::Value;
-use std::collections::{HashMap, HashSet};
+use std::collections::{HashMap};
 use std::convert::{TryFrom, TryInto};
-use std::iter::FromIterator;
 use std::ops::RangeBounds;
 use std::time::{Duration, UNIX_EPOCH};
 use tonic::{codegen::InterceptedService, transport::Channel, Request};
 
 use crate::compression_utils::{compress_json, decompress_json};
 use crate::credential_provider::CredentialProvider;
+use crate::response::cache::set_add_elements::SetAddElementsRequest;
 use crate::response::{
     DictionaryFetch, DictionaryGet, DictionaryPairs, Get, GetValue, ListCacheEntry, MomentoCache,
     MomentoCreateSigningKeyResponse, MomentoDeleteResponse, MomentoDictionaryDeleteResponse,
     MomentoDictionaryIncrementResponse, MomentoDictionarySetResponse, MomentoError,
     MomentoFlushCacheResponse, MomentoListCacheResponse, MomentoListFetchResponse,
-    MomentoListSigningKeyResult, MomentoSetDifferenceResponse, MomentoSetFetchResponse,
-    MomentoSetResponse, MomentoSigningKey, MomentoSortedSetFetchResponse, SortedSetFetch,
+    MomentoListSigningKeyResult, MomentoSetDifferenceResponse, MomentoSetResponse,
+    MomentoSigningKey, MomentoSortedSetFetchResponse, SetFetch, SetFetchValue, SortedSetFetch,
 };
 use crate::sorted_set;
 use crate::utils;
@@ -249,7 +249,7 @@ impl SimpleCacheClientBuilder {
 pub struct SimpleCacheClient {
     data_endpoint: String,
     control_client: ScsControlClient<InterceptedService<Channel, HeaderInterceptor>>,
-    data_client: ScsClient<InterceptedService<Channel, HeaderInterceptor>>,
+    pub(crate) data_client: ScsClient<InterceptedService<Channel, HeaderInterceptor>>,
     item_default_ttl: Duration,
 }
 
@@ -682,9 +682,6 @@ impl SimpleCacheClient {
 
     /// Sets dictionary items in a Momento Cache
     ///
-    /// *NOTE*: This is preview functionality and requires that you contact
-    /// Momento Support to enable these APIs for your cache.
-    ///
     /// # Arguments
     ///
     /// * `cache_name` - name of cache
@@ -744,9 +741,6 @@ impl SimpleCacheClient {
     }
 
     /// Get a subset of the fields in a dictionary from the Momento cache.
-    ///
-    /// *NOTE*: This is preview functionality and requires that you contact
-    /// Momento Support to enable these APIs for your cache.
     ///
     /// # Arguments
     ///
@@ -823,9 +817,6 @@ impl SimpleCacheClient {
 
     /// Fetches a dictionary from a Momento Cache
     ///
-    /// *NOTE*: This is preview functionality and requires that you contact
-    /// Momento Support to enable these APIs for your cache.
-    ///
     /// # Arguments
     ///
     /// * `cache_name` - name of cache
@@ -899,9 +890,6 @@ impl SimpleCacheClient {
 
     /// Delete entire dictionary or some dictionary fields from a Momento Cache
     ///
-    /// *NOTE*: This is preview functionality and requires that you contact
-    /// Momento Support to enable these APIs for your cache.
-    ///
     /// # Arguments
     ///
     /// * `cache_name` - name of cache
@@ -974,9 +962,6 @@ impl SimpleCacheClient {
     ///
     /// Returns the current value of the field within the dictionary after being incremented.
     ///
-    /// *NOTE*: This is preview functionality and requires that you contact
-    /// Momento Support to enable these APIs for your cache.
-    ///
     /// # Arguments
     ///
     /// * `cache_name` - name of cache.
@@ -1035,9 +1020,6 @@ impl SimpleCacheClient {
     }
 
     /// Push multiple values to the beginning of a list.
-    ///
-    /// *NOTE*: This is preview functionality and requires that you contact
-    /// Momento Support to enable these APIs for your cache.
     ///
     /// # Arguments
     ///
@@ -1100,9 +1082,6 @@ impl SimpleCacheClient {
     }
 
     /// Push multiple values to the end of a list.
-    ///
-    /// *NOTE*: This is preview functionality and requires that you contact
-    /// Momento Support to enable these APIs for your cache.
     ///
     /// # Arguments
     ///
@@ -1168,9 +1147,6 @@ impl SimpleCacheClient {
     ///
     /// A missing entry is treated as a list of length 0.
     ///
-    /// *NOTE*: This is preview functionality and requires that you contact
-    /// Momento Support to enable these APIs for your cache.
-    ///
     /// # Arguments
     ///
     /// * `cache_name` - name of the cache to store the list in.
@@ -1233,9 +1209,6 @@ impl SimpleCacheClient {
     ///
     /// A missing entry is treated as a list of length 0.
     ///
-    /// *NOTE*: This is preview functionality and requires that you contact
-    /// Momento Support to enable these APIs for your cache.
-    ///
     /// # Arguments
     ///
     /// * `cache_name` - name of the cache to store the list in.
@@ -1296,9 +1269,6 @@ impl SimpleCacheClient {
 
     /// Set a list within the cache.
     ///
-    /// *NOTE*: This is preview functionality and requires that you contact
-    /// Momento Support to enable these APIs for your cache.
-    ///
     /// # Arguments
     ///
     /// * `cache_name` - name of the cache to store the list in.
@@ -1348,9 +1318,6 @@ impl SimpleCacheClient {
     }
 
     /// Fetch the entire list from the cache.
-    ///
-    /// *NOTE*: This is preview functionality and requires that you contact
-    /// Momento Support to enable these APIs for your cache.
     ///
     /// # Arguments
     ///
@@ -1402,9 +1369,6 @@ impl SimpleCacheClient {
     }
 
     /// Retrieve and remove the first item from a list.
-    ///
-    /// *NOTE*: This is preview functionality and requires that you contact
-    /// Momento Support to enable these APIs for your cache.
     ///
     /// # Arguments
     ///
@@ -1462,9 +1426,6 @@ impl SimpleCacheClient {
 
     /// Retrieve and remove the last item from a list.
     ///
-    /// *NOTE*: This is preview functionality and requires that you contact
-    /// Momento Support to enable these APIs for your cache.
-    ///
     /// # Arguments
     ///
     /// * `cache_name` - name of the cache in which the list is stored.
@@ -1521,9 +1482,6 @@ impl SimpleCacheClient {
 
     /// Remove all elements in a list matching a particular value.
     ///
-    /// *NOTE*: This is preview functionality and requires that you contact
-    /// Momento Support to enable these APIs for your cache.
-    ///
     /// # Arguments
     ///
     /// * `cache_name` - name of the cache in which to look for the list.
@@ -1574,9 +1532,6 @@ impl SimpleCacheClient {
 
     /// Erase a range of elements from a list.
     ///
-    /// *NOTE*: This is preview functionality and requires that you contact
-    /// Momento Support to enable these APIs for your cache.
-    ///
     /// # Arguments
     ///
     /// * `cache_name` - the name of the cache in which to look for the list.
@@ -1615,9 +1570,6 @@ impl SimpleCacheClient {
     }
 
     /// Erase multiple ranges of elements from a list.
-    ///
-    /// *NOTE*: This is preview functionality and requires that you contact
-    /// Momento Support to enable these APIs for your cache.
     ///
     /// # Arguments
     ///
@@ -1696,9 +1648,6 @@ impl SimpleCacheClient {
 
     /// Fetch the length of a list from the cache.
     ///
-    /// *NOTE*: This is preview functionality and requires that you contact
-    /// Momento Support to enable these APIs for your cache.
-    ///
     /// # Arguments
     ///
     /// * `cache_name` - the name of the cache in which to look for the list.
@@ -1747,9 +1696,6 @@ impl SimpleCacheClient {
 
     /// Fetches a set from a Momento Cache.
     ///
-    /// *NOTE*: This is preview functionality and requires that you contact
-    /// Momento Support to enable these APIs for your cache.
-    ///
     /// # Arguments
     ///
     /// * `cache_name` - name of cache.
@@ -1760,29 +1706,36 @@ impl SimpleCacheClient {
     /// # fn main() -> momento_test_util::DoctestResult {
     /// # momento_test_util::doctest(|cache_name, credential_provider| async move {
     /// use std::time::Duration;
+    /// use std::collections::HashSet;
+    /// use std::convert::TryInto;
     /// use momento::SimpleCacheClientBuilder;
+    /// use momento::response::SetFetch;
     ///
     /// let mut momento = SimpleCacheClientBuilder::new(credential_provider, Duration::from_secs(30))?
     ///     .build();
     ///
-    /// match momento.set_fetch(&cache_name, "test set").await?.value {
-    ///     Some(set) => {
+    /// momento.set_add_elements(&cache_name, "present", vec!["a", "b", "c"]).send().await?;
+    ///
+    /// match momento.set_fetch(&cache_name, "test set").await? {
+    ///    SetFetch::Hit { value } => {
+    ///         let set: HashSet<Vec<u8>> = value.try_into().unwrap();
     ///         println!("set entries:");
     ///         for entry in &set {
     ///             println!("{:?}", entry);
     ///         }
-    ///     },
-    ///     None => println!("set not found!"),
+    ///     }
+    ///     SetFetch::Miss => println!("set not found!"),
     /// }
     /// # Ok(())
     /// # })
-    /// # }
+    /// #
+    /// }
     /// ```
     pub async fn set_fetch(
         &mut self,
         cache_name: &str,
         set_name: impl IntoBytes,
-    ) -> MomentoResult<MomentoSetFetchResponse> {
+    ) -> MomentoResult<SetFetch> {
         use set_fetch_response::Set;
 
         let request = self.prep_request(
@@ -1793,18 +1746,18 @@ impl SimpleCacheClient {
         )?;
 
         let response = self.data_client.set_fetch(request).await?.into_inner();
-        Ok(MomentoSetFetchResponse {
-            value: response.set.and_then(|set| match set {
-                Set::Found(found) => Some(HashSet::from_iter(found.elements)),
-                Set::Missing(_) => None,
+        match response.set {
+            Some(Set::Found(found)) => Ok(SetFetch::Hit {
+                value: SetFetchValue {
+                    raw_item: found.elements,
+                },
             }),
-        })
+            Some(Set::Missing(_)) => Ok(SetFetch::Miss),
+            None => unreachable!("set fetch response was neither found nor missing"),
+        }
     }
 
     /// Unions a set with one present within a Momento cache.
-    ///
-    /// *NOTE*: This is preview functionality and requires that you contact
-    /// Momento Support to enable these APIs for your cache.
     ///
     /// # Arguments
     ///
@@ -1818,7 +1771,10 @@ impl SimpleCacheClient {
     /// # fn main() -> momento_test_util::DoctestResult {
     /// # momento_test_util::doctest(|cache_name, credential_provider| async move {
     /// use std::time::Duration;
-    /// use momento::{CollectionTtl, SimpleCacheClientBuilder};
+    /// use std::collections::HashSet;
+    /// use std::convert::TryInto;
+    /// use momento::{CollectionTtl, SimpleCacheClientBuilder, MomentoResult};
+    /// use momento::response::SetFetch;
     ///
     /// let ttl = CollectionTtl::default();
     /// let mut momento = SimpleCacheClientBuilder::new(credential_provider, Duration::from_secs(30))?
@@ -1827,7 +1783,10 @@ impl SimpleCacheClient {
     /// momento.set_union(&cache_name, "myset", vec!["c", "d"], ttl).await?;
     /// momento.set_union(&cache_name, "myset", vec!["a", "b", "c"], ttl).await?;
     ///
-    /// let set = momento.set_fetch(&cache_name, "myset").await?.value.unwrap();
+    /// let set: HashSet<Vec<u8>> = match momento.set_fetch(&cache_name, "myset").await? {
+    ///     SetFetch::Hit { value: set } => set.try_into().unwrap(),
+    ///     _ => unreachable!("set was missing"),
+    /// };
     ///
     /// assert!(set.contains("a".as_bytes()));
     /// assert!(set.contains("b".as_bytes()));
@@ -1835,7 +1794,8 @@ impl SimpleCacheClient {
     /// assert!(set.contains("d".as_bytes()));
     /// # Ok(())
     /// # })
-    /// # }
+    /// #
+    /// }
     /// ```
     pub async fn set_union<E: IntoBytes>(
         &mut self,
@@ -1875,8 +1835,10 @@ impl SimpleCacheClient {
     /// # fn main() -> momento_test_util::DoctestResult {
     /// # momento_test_util::doctest(|cache_name, credential_provider| async move {
     /// use std::time::Duration;
+    /// use std::collections::HashSet;
+    /// use std::convert::TryInto;
     /// use momento::{CollectionTtl, SimpleCacheClientBuilder};
-    /// use momento::response::MomentoSetDifferenceResponse;
+    /// use momento::response::{MomentoSetDifferenceResponse, SetFetch};
     ///
     /// let ttl = CollectionTtl::default();
     /// let mut momento = SimpleCacheClientBuilder::new(credential_provider, Duration::from_secs(30))?
@@ -1885,7 +1847,10 @@ impl SimpleCacheClient {
     /// momento.set_union(&cache_name, "test set", vec!["a", "b", "c", "d"], ttl).await?;
     /// momento.set_difference(&cache_name, "test set", vec!["b", "d"]).await?;
     ///
-    /// let set = momento.set_fetch(&cache_name, "test set").await?.value.unwrap();
+    /// let set: HashSet<Vec<u8>> = match momento.set_fetch(&cache_name, "test set").await? {
+    ///     SetFetch::Hit { value: set } => set.try_into().unwrap(),
+    ///     _ => unreachable!("set was missing"),
+    /// };
     ///
     /// assert!(set.contains("a".as_bytes()));
     /// assert!(set.contains("c".as_bytes()));
@@ -1929,14 +1894,17 @@ impl SimpleCacheClient {
     /// This is an alias for [`set_union`].
     ///
     /// [`set_union`]: SimpleCacheClient::set_union
-    pub async fn set_add_elements<E: IntoBytes>(
+    pub fn set_add_elements<TElements: IntoBytes>(
         &mut self,
         cache_name: &str,
         set_name: impl IntoBytes,
-        elements: Vec<E>,
-        policy: CollectionTtl,
-    ) -> MomentoResult<()> {
-        self.set_union(cache_name, set_name, elements, policy).await
+        elements: Vec<TElements>,
+    ) -> SetAddElementsRequest {
+        // let send = async move |collection_ttl| self.set_union(cache_name, set_name, elements, collection_ttl).await;
+        // CollectionRequestBuilder::new(send)
+
+        // self.set_union(cache_name, set_name, elements, policy).await
+        SetAddElementsRequest::new(self.clone(), cache_name.to_string(), set_name.into_bytes(), convert_vec(elements))
     }
 
     /// This is an alias for [`set_difference`].
@@ -1952,9 +1920,6 @@ impl SimpleCacheClient {
     }
 
     /// Fetches a sorted set from a Momento Cache.
-    ///
-    /// *NOTE*: This is preview functionality and requires that you contact
-    /// Momento Support to enable these APIs for your cache.
     ///
     /// # Arguments
     ///
@@ -1976,9 +1941,6 @@ impl SimpleCacheClient {
 
     /// Fetches a range of elements from a sorted set from a Momento Cache
     /// selecting by index (rank).
-    ///
-    /// *NOTE*: This is preview functionality and requires that you contact
-    /// Momento Support to enable these APIs for your cache.
     ///
     /// # Arguments
     ///
@@ -2153,9 +2115,6 @@ impl SimpleCacheClient {
 
     /// Fetches a range of elements from a sorted set from a Momento Cache
     /// selecting by score.
-    ///
-    /// *NOTE*: This is preview functionality and requires that you contact
-    /// Momento Support to enable these APIs for your cache.
     ///
     /// # Arguments
     ///
@@ -2343,9 +2302,6 @@ impl SimpleCacheClient {
     /// returned. Otherwise, the `Some` variant contains the rank of the item
     /// within the sorted set.
     ///
-    /// *NOTE*: This is preview functionality and requires that you contact
-    /// Momento Support to enable these APIs for your cache.
-    ///
     /// # Arguments
     ///
     /// * `cache_name` - name of cache.
@@ -2419,9 +2375,6 @@ impl SimpleCacheClient {
     /// were provided. If the element was found, the `Some` variant contains the
     /// score of the element within the sorted set. Otherwise, if the sorted set
     /// or element was not found, the `None` variant will be in that position.
-    ///
-    /// *NOTE*: This is preview functionality and requires that you contact
-    /// Momento Support to enable these APIs for your cache.
     ///
     /// # Arguments
     ///
@@ -2501,9 +2454,6 @@ impl SimpleCacheClient {
     /// The return type is a `MomentoResult` where on success the element has
     /// been incremented and the new score is returned.
     ///
-    /// *NOTE*: This is preview functionality and requires that you contact
-    /// Momento Support to enable these APIs for your cache.
-    ///
     /// # Arguments
     ///
     /// * `cache_name` - name of cache.
@@ -2558,9 +2508,6 @@ impl SimpleCacheClient {
 
     /// Adds elements to a sorted set in a Momento Cache.
     ///
-    /// *NOTE*: This is preview functionality and requires that you contact
-    /// Momento Support to enable these APIs for your cache.
-    ///
     /// # Arguments
     ///
     /// * `cache_name` - name of cache.
@@ -2611,9 +2558,6 @@ impl SimpleCacheClient {
     }
 
     /// Removes elements from a sorted set from a Momento Cache.
-    ///
-    /// *NOTE*: This is preview functionality and requires that you contact
-    /// Momento Support to enable these APIs for your cache.
     ///
     /// # Arguments
     ///
@@ -2713,7 +2657,7 @@ impl SimpleCacheClient {
     // ) -> MomentoResult<MomentoGenerateApiTokenResponse> {
     // }
 
-    fn expand_ttl_ms(&self, ttl: Option<Duration>) -> MomentoResult<u64> {
+    pub(crate) fn expand_ttl_ms(&self, ttl: Option<Duration>) -> MomentoResult<u64> {
         let ttl = ttl.unwrap_or(self.item_default_ttl);
         utils::is_ttl_valid(ttl)?;
 

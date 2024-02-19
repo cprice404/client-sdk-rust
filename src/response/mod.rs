@@ -11,6 +11,7 @@ mod flush_cache_response;
 mod generate_api_token_response;
 mod list_cache_response;
 mod list_signing_keys_response;
+pub mod cache;
 
 use crate::MomentoResult;
 
