@@ -249,7 +249,7 @@ impl SimpleCacheClientBuilder {
 pub struct SimpleCacheClient {
     data_endpoint: String,
     control_client: ScsControlClient<InterceptedService<Channel, HeaderInterceptor>>,
-    data_client: ScsClient<InterceptedService<Channel, HeaderInterceptor>>,
+    pub(crate) data_client: ScsClient<InterceptedService<Channel, HeaderInterceptor>>,
     item_default_ttl: Duration,
 }
 
@@ -2713,7 +2713,7 @@ impl SimpleCacheClient {
     // ) -> MomentoResult<MomentoGenerateApiTokenResponse> {
     // }
 
-    fn expand_ttl_ms(&self, ttl: Option<Duration>) -> MomentoResult<u64> {
+    pub(crate) fn expand_ttl_ms(&self, ttl: Option<Duration>) -> MomentoResult<u64> {
         let ttl = ttl.unwrap_or(self.item_default_ttl);
         utils::is_ttl_valid(ttl)?;
 
@@ -2736,6 +2736,6 @@ pub enum Fields<K> {
     Some(Vec<K>),
 }
 
-fn convert_vec<E: IntoBytes>(vec: impl IntoIterator<Item = E>) -> Vec<Vec<u8>> {
+pub(crate) fn convert_vec<E: IntoBytes>(vec: impl IntoIterator<Item = E>) -> Vec<Vec<u8>> {
     vec.into_iter().map(|e| e.into_bytes()).collect()
 }
