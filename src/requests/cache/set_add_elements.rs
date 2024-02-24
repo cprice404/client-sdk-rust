@@ -1,5 +1,6 @@
 use momento_protos::cache_client::SetUnionRequest;
-use crate::{CollectionTtl, IntoBytes, MomentoResult, SimpleCacheClient};
+use crate::{CollectionTtl, IntoBytes, MomentoResult};
+use crate::cache_client::CacheClient;
 use crate::requests::cache::{MomentoRequest, MomentoResponse};
 use crate::simple_cache_client::prep_request;
 
@@ -10,8 +11,20 @@ pub struct SetAddElementsRequest<S: IntoBytes, E: IntoBytes> {
     collection_ttl: Option<CollectionTtl>
 }
 
+impl <S: IntoBytes, E: IntoBytes> SetAddElementsRequest<S, E> {
+    pub fn new(cache_name: String, set_name: S, elements: Vec<E>) -> Self {
+        let collection_ttl = CollectionTtl::default();
+        Self {
+            cache_name,
+            set_name,
+            elements,
+            collection_ttl: Some(collection_ttl),
+        }
+    }
+}
+
 impl <S: IntoBytes, E: IntoBytes> MomentoRequest<SetAddElements> for SetAddElementsRequest<S, E> {
-    async fn send(self: Self, cache_client: &SimpleCacheClient) -> MomentoResult<SetAddElements> {
+    async fn send(self: Self, cache_client: &CacheClient) -> MomentoResult<SetAddElements> {
         let collection_ttl = self.collection_ttl.unwrap_or_default();
         let elements = self.elements.into_iter().map(|e| e.into_bytes()).collect();
         let request = prep_request(

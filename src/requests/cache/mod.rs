@@ -1,8 +1,9 @@
-use crate::{MomentoResult, SimpleCacheClient};
+use crate::{MomentoResult};
+use crate::cache_client::CacheClient;
 
 pub mod set_add_elements;
 
-trait MomentoResponse {}
-trait MomentoRequest<R: MomentoResponse> {
-    async fn send(self: Self, cache_client: &SimpleCacheClient) -> MomentoResult<R>;
+pub trait MomentoResponse {}
+pub trait MomentoRequest<R: MomentoResponse> {
+    async fn send(self: Self, cache_client: &CacheClient) -> MomentoResult<R>;
 }

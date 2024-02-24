@@ -7,6 +7,7 @@ mod compression_utils;
 mod credential_provider;
 mod grpc;
 mod simple_cache_client;
+mod cache_client;
 mod utils;
 
 pub use crate::credential_provider::{CredentialProvider, CredentialProviderBuilder};
