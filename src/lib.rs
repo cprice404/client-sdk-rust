@@ -17,6 +17,8 @@ pub use crate::simple_cache_client::{
     CollectionTtl, Fields, IntoBytes, SimpleCacheClient, SimpleCacheClientBuilder,
 };
 
+pub use crate::cache_client::CacheClient;
+
 pub type MomentoResult<T> = Result<T, MomentoError>;
 
 pub mod sorted_set {
