@@ -61,7 +61,13 @@ pub struct CollectionTtl {
     refresh: bool,
 }
 
+// TODO clean this up, make it match the latest in JS etc.
+
 impl CollectionTtl {
+    pub const fn of(ttl: Duration) -> Self {
+        Self { ttl: Some(ttl), refresh: true }
+    }
+    
     /// Create a collection TTL with the provided `ttl` and `refresh` settings.
     pub const fn new(ttl: Option<Duration>, refresh: bool) -> Self {
         Self { ttl, refresh }
