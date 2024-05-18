@@ -181,28 +181,33 @@ where
 /// We implement both modes for the `fmt` module.
 pub(crate) mod fmt {
 
+    pub(crate) fn fmt_bytes_for_debug(alternate: bool, bytes: &[u8]) -> (bool, String) {
+        let as_str = String::from_utf8(bytes.to_vec());
+
+        match as_str {
+            Ok(s) => {
+                (true, s)
+            }
+            Err(_) => {
+                if alternate {
+                    (false, format!("{:#?} (as string: <invalid UTF-8>)", bytes))
+                } else {
+                    (false, format!("{:?} (<invalid UTF-8>)", bytes))
+                }
+            }
+        }
+    }
+    
     pub(crate) fn write_bytes_for_debug(
         f: &mut std::fmt::Formatter<'_>,
         name: &str,
         bytes: &[u8],
     ) -> std::fmt::Result {
-        let as_str = String::from_utf8(bytes.to_vec());
-
-        match as_str {
-            Ok(s) => {
-                if f.alternate() {
-                    write!(f, " {}: {:#?} (as string: {:#?})", name, bytes, s)
-                } else {
-                    write!(f, " {}: {:?} (as string: {:?})", name, bytes, s)
-                }
-            }
-            Err(_) => {
-                if f.alternate() {
-                    write!(f, " {}: {:#?} (as string: <invalid UTF-8>)", name, bytes)
-                } else {
-                    write!(f, " {}: {:?} (as string: <invalid UTF-8>)", name, bytes)
-                }
-            }
+        let (valid_utf8, as_str) = fmt_bytes_for_debug(f.alternate(), bytes);
+        if valid_utf8 {
+            write!(f, " {}: {:?}", name, as_str)
+        } else {
+            write!(f, " {}: {}", name, as_str)
         }
     }
 

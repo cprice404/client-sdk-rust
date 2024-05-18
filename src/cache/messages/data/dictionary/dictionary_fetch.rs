@@ -1,12 +1,14 @@
 use crate::cache::messages::MomentoRequest;
 use crate::utils::{parse_string, prep_request_with_timeout};
-use crate::{CacheClient, IntoBytes, MomentoError, MomentoResult};
+use crate::{CacheClient, IntoBytes, MomentoError, MomentoResult, utils};
 use momento_protos::cache_client::{
     dictionary_fetch_response::Dictionary as DictionaryProto,
     DictionaryFetchRequest as DictionaryFetchRequestProto,
 };
 use std::collections::HashMap;
 use std::convert::{TryFrom, TryInto};
+use derive_more::Display;
+use crate::utils::fmt::fmt_bytes_for_debug;
 
 /// Request to fetch a dictionary from a cache.
 ///
@@ -153,7 +155,7 @@ impl<D: IntoBytes> MomentoRequest for DictionaryFetchRequest<D> {
 /// use std::convert::TryInto;
 /// let item: MomentoResult<HashMap<Vec<u8>, Vec<u8>>> = fetch_response.try_into();
 /// ```
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, Display, PartialEq, Eq)]
 pub enum DictionaryFetchResponse {
     /// The dictionary was found.
     Hit {
@@ -165,10 +167,40 @@ pub enum DictionaryFetchResponse {
 }
 
 /// A dictionary fetched from a cache.
-#[derive(Debug, PartialEq, Eq, Default)]
+#[derive(PartialEq, Eq, Default)]
 pub struct Value {
     /// The raw dictionary item.
     pub(crate) raw_item: HashMap<Vec<u8>, Vec<u8>>,
+}
+
+
+impl std::fmt::Debug for Value {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        utils::fmt::write_struct_begin(f, "Value")?;
+        f.write_str(" raw_item: ")?;
+        /*
+
+impl fmt::Debug for Foo {
+    fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
+        fmt.debug_map().entries(self.0.iter().map(|&(ref k, ref v)| (k, v))).finish()
+    }
+}
+         */
+
+
+        let alt = f.alternate();
+        f.debug_map()
+            .entries(self.raw_item.iter().map(|(k, v)|
+                (fmt_bytes_for_debug(alt, k), fmt_bytes_for_debug(alt, v))
+            )).finish()?;
+        utils::fmt::write_struct_end(f)
+    }
+}
+
+impl std::fmt::Display for Value {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:?}", self)
+    }
 }
 
 impl Value {
@@ -219,3 +251,42 @@ impl TryFrom<DictionaryFetchResponse> for HashMap<String, String> {
         }
     }
 }
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_dictionary_fetch_response_display() -> MomentoResult<()> {
+        let hit = DictionaryFetchResponse::Hit {
+            value: Value::new(HashMap::from([
+                ("taco".as_bytes().to_vec(), "TACO".as_bytes().to_vec()),
+            ])),
+        };
+        assert_eq!(
+            format!("{}", hit),
+            r#"Value { raw_item: {"taco": "TACO"} }"#
+        );
+        assert_eq!(
+            format!("{:?}", hit),
+            r#"Hit { value: Value { raw_item: {"taco": "TACO"} } }"#
+        );
+        assert_eq!(
+            format!("{:#?}", hit),
+            r#"Hit {
+    value: Value { raw_item: {
+        "taco": "TACO",
+    }
+    },
+}"#
+        );
+
+        let miss = DictionaryFetchResponse::Miss;
+        assert_eq!(format!("{}", miss), "Miss");
+        assert_eq!(format!("{:?}", miss), "Miss");
+
+        Ok(())
+    }
+}
+

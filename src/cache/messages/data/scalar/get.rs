@@ -225,19 +225,17 @@ mod tests {
             value: Value::new("hello".as_bytes().to_vec()),
         };
         assert_eq!(
+            format!("{}", hit),
+            r#"Value { raw_item: "hello" }"#
+        );
+        assert_eq!(
             format!("{:?}", hit),
-            "Hit { value: Value { raw_item: [104, 101, 108, 108, 111] (as string: \"hello\") } }"
+            r#"Hit { value: Value { raw_item: "hello" } }"#
         );
         assert_eq!(
             format!("{:#?}", hit),
             r#"Hit {
-    value: Value { raw_item: [
-        104,
-        101,
-        108,
-        108,
-        111,
-    ] (as string: "hello")
+    value: Value { raw_item: "hello"
     },
 }"#
         );
