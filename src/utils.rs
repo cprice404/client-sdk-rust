@@ -193,9 +193,31 @@ pub(crate) mod fmt {
         String(String),
         Bytes(Vec<u8>),
     }
-    
+
     pub(crate) trait AsDebuggableValue {
         fn as_debuggable_value(&self) -> DebuggableValue;
+    }
+
+    impl AsDebuggableValue for String {
+        fn as_debuggable_value(&self) -> DebuggableValue {
+            DebuggableValue::String(self.clone())
+        }
+    }
+
+    impl AsDebuggableValue for &str {
+        fn as_debuggable_value(&self) -> DebuggableValue {
+            DebuggableValue::String(self.to_string())
+        }
+    }
+
+    impl AsDebuggableValue for Vec<u8> {
+        fn as_debuggable_value(&self) -> DebuggableValue {
+            let as_str = String::from_utf8(self.clone());
+            match as_str {
+                Ok(s) => DebuggableValue::String(s),
+                Err(_) => DebuggableValue::Bytes(self.clone()),
+            }
+        }
     }
 
     impl Debug for DebuggableValue {
@@ -203,22 +225,6 @@ pub(crate) mod fmt {
             match self {
                 DebuggableValue::String(s) => f.write_fmt(format_args!("{:?}", s)),
                 DebuggableValue::Bytes(b) => f.debug_list().entries(b.iter()).finish(),
-            }
-        }
-    }
-
-    impl From<String> for DebuggableValue {
-        fn from(value: String) -> Self {
-            DebuggableValue::String(value)
-        }
-    }
-
-    impl From<&Vec<u8>> for DebuggableValue {
-        fn from(value: &Vec<u8>) -> Self {
-            let as_str = String::from_utf8(value.clone());
-            match as_str {
-                Ok(s) => DebuggableValue::String(s),
-                Err(_) => DebuggableValue::Bytes(value.clone()),
             }
         }
     }

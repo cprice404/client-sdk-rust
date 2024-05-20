@@ -1,15 +1,15 @@
 use crate::cache::messages::MomentoRequest;
+use crate::utils::fmt::{AsDebuggableValue, DebuggableValue};
 use crate::utils::{parse_string, prep_request_with_timeout};
 use crate::{CacheClient, IntoBytes, MomentoError, MomentoResult};
+use derive_more::Display;
 use momento_protos::cache_client::{
     dictionary_fetch_response::Dictionary as DictionaryProto,
     DictionaryFetchRequest as DictionaryFetchRequestProto,
 };
 use std::collections::HashMap;
 use std::convert::{TryFrom, TryInto};
-use std::fmt::{Debug};
-use derive_more::Display;
-use crate::utils::fmt::{DebuggableValue};
+use std::fmt::Debug;
 
 /// Request to fetch a dictionary from a cache.
 ///
@@ -176,12 +176,11 @@ pub struct Value {
 
 impl Debug for Value {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let debug_map_with_strings: HashMap<DebuggableValue, DebuggableValue> =
-            self.raw_item
-                .iter()
-                .map(|(k, v)| {
-            (k.into(), v.into())
-        }).collect();
+        let debug_map_with_strings: HashMap<DebuggableValue, DebuggableValue> = self
+            .raw_item
+            .iter()
+            .map(|(k, v)| (k.as_debuggable_value(), v.as_debuggable_value()))
+            .collect();
         f.debug_struct("Value")
             .field("raw_item", &debug_map_with_strings)
             .finish()
@@ -243,7 +242,6 @@ impl TryFrom<DictionaryFetchResponse> for HashMap<String, String> {
     }
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -251,9 +249,10 @@ mod tests {
     #[test]
     fn test_dictionary_fetch_response_display() -> MomentoResult<()> {
         let hit = DictionaryFetchResponse::Hit {
-            value: Value::new(HashMap::from([
-                ("taco".as_bytes().to_vec(), "TACO".as_bytes().to_vec()),
-            ])),
+            value: Value::new(HashMap::from([(
+                "taco".as_bytes().to_vec(),
+                "TACO".as_bytes().to_vec(),
+            )])),
         };
         assert_eq!(
             format!("{}", hit),
@@ -265,20 +264,23 @@ mod tests {
         );
         assert_eq!(
             format!("{:#?}", hit),
-            str::trim(r#"
+            str::trim(
+                r#"
 Hit {
     value: Value {
         raw_item: {
             "taco": "TACO",
         },
     },
-}"#)
+}"#
+            )
         );
 
         let hit_with_binary_value = DictionaryFetchResponse::Hit {
-            value: Value::new(HashMap::from([
-                ("taco".as_bytes().to_vec(), vec!(0, 150, 146, 159)),
-            ])),
+            value: Value::new(HashMap::from([(
+                "taco".as_bytes().to_vec(),
+                vec![0, 150, 146, 159],
+            )])),
         };
         assert_eq!(
             format!("{}", hit_with_binary_value),
@@ -290,7 +292,8 @@ Hit {
         );
         assert_eq!(
             format!("{:#?}", hit_with_binary_value),
-            str::trim(r#"
+            str::trim(
+                r#"
 Hit {
     value: Value {
         raw_item: {
@@ -302,13 +305,15 @@ Hit {
             ],
         },
     },
-}"#)
+}"#
+            )
         );
 
         let hit_with_binary_key_and_value = DictionaryFetchResponse::Hit {
-            value: Value::new(HashMap::from([
-                (vec!(0, 159, 146, 150), vec!(0, 150, 146, 159)),
-            ])),
+            value: Value::new(HashMap::from([(
+                vec![0, 159, 146, 150],
+                vec![0, 150, 146, 159],
+            )])),
         };
         assert_eq!(
             format!("{}", hit_with_binary_key_and_value),
@@ -320,7 +325,8 @@ Hit {
         );
         assert_eq!(
             format!("{:#?}", hit_with_binary_key_and_value),
-            str::trim(r#"
+            str::trim(
+                r#"
 Hit {
     value: Value {
         raw_item: {
@@ -337,7 +343,8 @@ Hit {
             ],
         },
     },
-}"#)
+}"#
+            )
         );
 
         let miss = DictionaryFetchResponse::Miss;
@@ -347,4 +354,3 @@ Hit {
         Ok(())
     }
 }
-
