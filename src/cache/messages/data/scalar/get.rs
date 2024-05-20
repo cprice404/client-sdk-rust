@@ -5,6 +5,7 @@ use crate::{IntoBytes, MomentoError, MomentoResult};
 use derive_more::Display;
 use momento_protos::cache_client::ECacheResult;
 use std::convert::{TryFrom, TryInto};
+use crate::utils::fmt::DebuggableValue;
 
 /// Request to get an item from a cache
 ///
@@ -160,9 +161,11 @@ pub struct Value {
 
 impl std::fmt::Debug for Value {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        utils::fmt::write_struct_begin(f, "Value")?;
-        utils::fmt::write_bytes_for_debug(f, "raw_item", &self.raw_item)?;
-        utils::fmt::write_struct_end(f)
+        let raw_item = &self.raw_item;
+        let debug_value: DebuggableValue = raw_item.into();
+        f.debug_struct("Value")
+            .field("raw_item", &debug_value)
+            .finish()
     }
 }
 
@@ -234,10 +237,38 @@ mod tests {
         );
         assert_eq!(
             format!("{:#?}", hit),
-            r#"Hit {
-    value: Value { raw_item: "hello"
+            str::trim(r#"
+Hit {
+    value: Value {
+        raw_item: "hello",
     },
-}"#
+}"#)
+        );
+
+        let hit_with_binary_value = GetResponse::Hit {
+            value: Value::new(vec![0, 150, 146, 159]),
+        };
+        assert_eq!(
+            format!("{}", hit_with_binary_value),
+            r#"Value { raw_item: [0, 150, 146, 159] }"#
+        );
+        assert_eq!(
+            format!("{:?}", hit_with_binary_value),
+            r#"Hit { value: Value { raw_item: [0, 150, 146, 159] } }"#
+        );
+        assert_eq!(
+            format!("{:#?}", hit_with_binary_value),
+            str::trim(r#"
+Hit {
+    value: Value {
+        raw_item: [
+            0,
+            150,
+            146,
+            159,
+        ],
+    },
+}"#)
         );
 
         let miss = GetResponse::Miss;

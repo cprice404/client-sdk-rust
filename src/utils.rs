@@ -174,55 +174,52 @@ where
     }
 }
 
-/// Some notes on the `fmt` module:
-/// There are two modes to debug print:
-/// - Regular: `{:?}`
-/// - Alternate (pretty): `{:#?}`
-/// We implement both modes for the `fmt` module.
+/// Module for use in implementing various formatting traits (Display, Debug) for Momento types.
+/// These will mostly be used in response objects, and the main purpose is to provide an easy way
+/// to toggle between displaying strings or bytes when fields are of type Vec<u8>.
 pub(crate) mod fmt {
+    use std::fmt::{Debug, Formatter};
 
-    pub(crate) fn fmt_bytes_for_debug(alternate: bool, bytes: &[u8]) -> (bool, String) {
-        let as_str = String::from_utf8(bytes.to_vec());
-
-        match as_str {
-            Ok(s) => {
-                (true, s)
-            }
-            Err(_) => {
-                if alternate {
-                    (false, format!("{:#?} (as string: <invalid UTF-8>)", bytes))
-                } else {
-                    (false, format!("{:?} (<invalid UTF-8>)", bytes))
-                }
-            }
-        }
+    /// Enum representing a value that can be displayed in a debuggable format. When implementing
+    /// the Debug or Display traits for your Momento type, if you have a Vec<u8> field that we may
+    /// want to format as either a String or a list of bytes, use `.into()` to convert it into
+    /// an instance of this enum, and then pass it to the standard Formatter apis.
+    ///
+    /// For best results, always call `Formatter.debug_*` and avoid calling `Formatter.write_*` when
+    /// possible, because this will prevent you from needing to try to manually implement the
+    /// pretty-printing indentation logic on your own.
+    #[derive(PartialEq, Eq, Hash)]
+    pub(crate) enum DebuggableValue {
+        String(String),
+        Bytes(Vec<u8>),
     }
     
-    pub(crate) fn write_bytes_for_debug(
-        f: &mut std::fmt::Formatter<'_>,
-        name: &str,
-        bytes: &[u8],
-    ) -> std::fmt::Result {
-        let (valid_utf8, as_str) = fmt_bytes_for_debug(f.alternate(), bytes);
-        if valid_utf8 {
-            write!(f, " {}: {:?}", name, as_str)
-        } else {
-            write!(f, " {}: {}", name, as_str)
+    pub(crate) trait AsDebuggableValue {
+        fn as_debuggable_value(&self) -> DebuggableValue;
+    }
+
+    impl Debug for DebuggableValue {
+        fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+            match self {
+                DebuggableValue::String(s) => f.write_fmt(format_args!("{:?}", s)),
+                DebuggableValue::Bytes(b) => f.debug_list().entries(b.iter()).finish(),
+            }
         }
     }
 
-    pub(crate) fn write_struct_begin(
-        f: &mut std::fmt::Formatter<'_>,
-        name: &str,
-    ) -> std::fmt::Result {
-        write!(f, "{} {{", name)
+    impl From<String> for DebuggableValue {
+        fn from(value: String) -> Self {
+            DebuggableValue::String(value)
+        }
     }
 
-    pub(crate) fn write_struct_end(f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        if f.alternate() {
-            write!(f, "\n}}")
-        } else {
-            write!(f, " }}")
+    impl From<&Vec<u8>> for DebuggableValue {
+        fn from(value: &Vec<u8>) -> Self {
+            let as_str = String::from_utf8(value.clone());
+            match as_str {
+                Ok(s) => DebuggableValue::String(s),
+                Err(_) => DebuggableValue::Bytes(value.clone()),
+            }
         }
     }
 }

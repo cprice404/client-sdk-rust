@@ -1,14 +1,15 @@
 use crate::cache::messages::MomentoRequest;
 use crate::utils::{parse_string, prep_request_with_timeout};
-use crate::{CacheClient, IntoBytes, MomentoError, MomentoResult, utils};
+use crate::{CacheClient, IntoBytes, MomentoError, MomentoResult};
 use momento_protos::cache_client::{
     dictionary_fetch_response::Dictionary as DictionaryProto,
     DictionaryFetchRequest as DictionaryFetchRequestProto,
 };
 use std::collections::HashMap;
 use std::convert::{TryFrom, TryInto};
+use std::fmt::{Debug};
 use derive_more::Display;
-use crate::utils::fmt::fmt_bytes_for_debug;
+use crate::utils::fmt::{DebuggableValue};
 
 /// Request to fetch a dictionary from a cache.
 ///
@@ -173,27 +174,17 @@ pub struct Value {
     pub(crate) raw_item: HashMap<Vec<u8>, Vec<u8>>,
 }
 
-
-impl std::fmt::Debug for Value {
+impl Debug for Value {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        utils::fmt::write_struct_begin(f, "Value")?;
-        f.write_str(" raw_item: ")?;
-        /*
-
-impl fmt::Debug for Foo {
-    fn fmt(&self, fmt: &mut fmt::Formatter<'_>) -> fmt::Result {
-        fmt.debug_map().entries(self.0.iter().map(|&(ref k, ref v)| (k, v))).finish()
-    }
-}
-         */
-
-
-        let alt = f.alternate();
-        f.debug_map()
-            .entries(self.raw_item.iter().map(|(k, v)|
-                (fmt_bytes_for_debug(alt, k), fmt_bytes_for_debug(alt, v))
-            )).finish()?;
-        utils::fmt::write_struct_end(f)
+        let debug_map_with_strings: HashMap<DebuggableValue, DebuggableValue> =
+            self.raw_item
+                .iter()
+                .map(|(k, v)| {
+            (k.into(), v.into())
+        }).collect();
+        f.debug_struct("Value")
+            .field("raw_item", &debug_map_with_strings)
+            .finish()
     }
 }
 
@@ -274,12 +265,79 @@ mod tests {
         );
         assert_eq!(
             format!("{:#?}", hit),
-            r#"Hit {
-    value: Value { raw_item: {
-        "taco": "TACO",
-    }
+            str::trim(r#"
+Hit {
+    value: Value {
+        raw_item: {
+            "taco": "TACO",
+        },
     },
-}"#
+}"#)
+        );
+
+        let hit_with_binary_value = DictionaryFetchResponse::Hit {
+            value: Value::new(HashMap::from([
+                ("taco".as_bytes().to_vec(), vec!(0, 150, 146, 159)),
+            ])),
+        };
+        assert_eq!(
+            format!("{}", hit_with_binary_value),
+            r#"Value { raw_item: {"taco": [0, 150, 146, 159]} }"#
+        );
+        assert_eq!(
+            format!("{:?}", hit_with_binary_value),
+            r#"Hit { value: Value { raw_item: {"taco": [0, 150, 146, 159]} } }"#
+        );
+        assert_eq!(
+            format!("{:#?}", hit_with_binary_value),
+            str::trim(r#"
+Hit {
+    value: Value {
+        raw_item: {
+            "taco": [
+                0,
+                150,
+                146,
+                159,
+            ],
+        },
+    },
+}"#)
+        );
+
+        let hit_with_binary_key_and_value = DictionaryFetchResponse::Hit {
+            value: Value::new(HashMap::from([
+                (vec!(0, 159, 146, 150), vec!(0, 150, 146, 159)),
+            ])),
+        };
+        assert_eq!(
+            format!("{}", hit_with_binary_key_and_value),
+            r#"Value { raw_item: {[0, 159, 146, 150]: [0, 150, 146, 159]} }"#
+        );
+        assert_eq!(
+            format!("{:?}", hit_with_binary_key_and_value),
+            r#"Hit { value: Value { raw_item: {[0, 159, 146, 150]: [0, 150, 146, 159]} } }"#
+        );
+        assert_eq!(
+            format!("{:#?}", hit_with_binary_key_and_value),
+            str::trim(r#"
+Hit {
+    value: Value {
+        raw_item: {
+            [
+                0,
+                159,
+                146,
+                150,
+            ]: [
+                0,
+                150,
+                146,
+                159,
+            ],
+        },
+    },
+}"#)
         );
 
         let miss = DictionaryFetchResponse::Miss;
