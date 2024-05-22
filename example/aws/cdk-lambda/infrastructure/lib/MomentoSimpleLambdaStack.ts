@@ -14,22 +14,15 @@ export class MomentoSimpleLambdaStack extends cdk.Stack {
       noEcho: true,
     });
 
-    const apiKeySecret = new secrets.Secret(this, 'MomentoSimpleGetApiKey', {
-      secretName: 'MomentoSimpleGetApiKey',
-      secretStringValue: new cdk.SecretValue(momentoApiKeyParam.valueAsString),
-    });
-
-    const rustLambda = new RustFunction(this, 'MomentoSimpleRustLambda', {
+    new RustFunction(this, 'MomentoSimpleRustLambda', {
       functionName: 'MomentoSimpleRustLambda',
       runtime: 'provided.al2023',
       manifestPath: path.join(__dirname, '../../lambda/momento-simple-lambda/Cargo.toml'),
       timeout: cdk.Duration.seconds(30),
       memorySize: 128,
       environment: {
-        MOMENTO_API_KEY_SECRET_NAME: apiKeySecret.secretName,
+        MOMENTO_API_KEY: momentoApiKeyParam.valueAsString,
       },
     });
-
-    apiKeySecret.grantRead(rustLambda);
   }
 }
