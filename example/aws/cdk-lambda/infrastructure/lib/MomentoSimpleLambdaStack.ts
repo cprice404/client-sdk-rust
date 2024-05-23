@@ -1,7 +1,6 @@
 import * as path from 'path';
 import * as cdk from 'aws-cdk-lib';
 import {Construct} from 'constructs';
-import * as secrets from 'aws-cdk-lib/aws-secretsmanager';
 import {RustFunction} from 'cargo-lambda-cdk';
 
 export class MomentoSimpleLambdaStack extends cdk.Stack {
