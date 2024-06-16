@@ -396,6 +396,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d231dfb89cfffdbc30e7fc41579ed6066ad03abda9e567ccafae602b97ec5024"
 
 [[package]]
+name = "histogram"
+version = "0.11.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b62b8d85713ddc62e5e78db13bf9f9305610d0419276faa845076a68b7165872"
+dependencies = [
+ "thiserror",
+]
+
+[[package]]
 name = "http"
 version = "0.2.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -731,9 +740,9 @@ dependencies = [
 
 [[package]]
 name = "momento"
-version = "0.39.0"
+version = "0.39.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bc6cc13e5f12252e3f2b65afa9f0d167fc5811ee953b8b551bd2d257d25cad4e"
+checksum = "9a6621792e6cad5e96cbbc2280c613dd90404efbafc701768c028dc748ae0509"
 dependencies = [
  "base64 0.21.7",
  "derive_more",
@@ -759,18 +768,6 @@ checksum = "e3ec583ac0f49c6932df27dd0f9aa62e899e6c643a8a47c3c1fbae358254aa5c"
 dependencies = [
  "prost",
  "tonic",
-]
-
-[[package]]
-name = "momento-simple-lambda"
-version = "0.1.0"
-dependencies = [
- "lambda_runtime",
- "lazy_static",
- "momento",
- "serde_json",
- "thiserror",
- "tokio",
 ]
 
 [[package]]
@@ -1046,6 +1043,19 @@ dependencies = [
  "spin 0.9.8",
  "untrusted 0.9.0",
  "windows-sys 0.52.0",
+]
+
+[[package]]
+name = "rust-loadgen-lambda"
+version = "0.1.0"
+dependencies = [
+ "histogram",
+ "lambda_runtime",
+ "lazy_static",
+ "momento",
+ "serde_json",
+ "thiserror",
+ "tokio",
 ]
 
 [[package]]
