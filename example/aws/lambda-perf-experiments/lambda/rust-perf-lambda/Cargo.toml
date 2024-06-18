@@ -23,4 +23,5 @@ momento = "0.39.7"
 lazy_static = "1.4.0"
 thiserror = "1.0.61"
 histogram = "0.11.0"
+hdrhistogram = "7.5.4"
 
