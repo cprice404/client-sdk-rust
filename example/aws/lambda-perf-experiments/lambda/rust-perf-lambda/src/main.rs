@@ -3,6 +3,7 @@ use serde_json::Value;
 use lambda_runtime::{run, service_fn, tracing, Error, LambdaEvent};
 use momento::cache::configurations::Lambda;
 use momento::{CacheClient, CredentialProvider};
+use rust_loadgen_lambda::loadgen::run_loadgen;
 
 const DEFAULT_TTL: Duration = Duration::from_secs(60);
 
@@ -22,21 +23,8 @@ lazy_static::lazy_static! {
 /// - https://github.com/awslabs/aws-lambda-rust-runtime/tree/main/examples
 /// - https://github.com/aws-samples/serverless-rust-demo/
 async fn function_handler(_event: LambdaEvent<Value>) -> Result<(), Error> {
-    // Extract some useful information from the request
-
-    let set_result = CACHE_CLIENT.set("cache", "my-cache-key", "my-cache-value").await;
-    match set_result {
-        Ok(_) => println!("Successfully set cache value for key my-cache-key!"),
-        Err(e) => println!("Uh-oh. Failed to set cache key: {}", e),
-    }
-
-    let get_result: String = CACHE_CLIENT.get("cache", "my-cache-key")
-        .await
-        .expect("Failed to get cache value for key my-cache-key")
-        .try_into()
-        .expect("Failed to convert cache value to String");
     
-    println!("Successfully retrieved cache value for key my-cache-key: {}", get_result);
+    run_loadgen().await?;
     
     Ok(())
 }

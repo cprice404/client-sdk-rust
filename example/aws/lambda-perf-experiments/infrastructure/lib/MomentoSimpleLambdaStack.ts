@@ -13,11 +13,11 @@ export class MomentoSimpleLambdaStack extends cdk.Stack {
       noEcho: true,
     });
 
-    new RustFunction(this, 'MomentoSimpleRustLambda', {
-      functionName: 'MomentoSimpleRustLambda',
+    new RustFunction(this, 'RustPerfLambda', {
+      functionName: 'RustPerfLambda',
       runtime: 'provided.al2023',
-      manifestPath: path.join(__dirname, '../../lambda/momento-simple-lambda/Cargo.toml'),
-      timeout: cdk.Duration.seconds(30),
+      manifestPath: path.join(__dirname, '../../lambda/rust-perf-lambda/Cargo.toml'),
+      timeout: cdk.Duration.seconds(300),
       memorySize: 128,
       environment: {
         MOMENTO_API_KEY: momentoApiKeyParam.valueAsString,
