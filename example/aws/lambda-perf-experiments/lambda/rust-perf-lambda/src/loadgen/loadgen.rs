@@ -37,7 +37,7 @@ pub async fn run_loadgen() -> Result<(), LoadGenError> {
     let mut set_histogram: SyncHistogram<u32> = Histogram::<u32>::new(4)?.into();
     let mut get_histogram: SyncHistogram<u32> = Histogram::<u32>::new(4)?.into();
 
-    let num_workers = 5;
+    let num_workers = 100;
     // let num_workers = 1;
     let run_time = Duration::from_secs(30);
     let mut workers_set = JoinSet::new();
@@ -52,20 +52,20 @@ pub async fn run_loadgen() -> Result<(), LoadGenError> {
     while let Some(worker_result) = workers_set.join_next().await {
         println!("Worker finished with result: {:?}", worker_result?);
     }
-    
+
     set_histogram.refresh();
     get_histogram.refresh();
-    
+
     let p50 = set_histogram.value_at_percentile(50.0);
     println!("Set latency p50: {} ms", p50);
     let p50 = get_histogram.value_at_percentile(50.0);
     println!("Get latency p50: {} ms", p50);
-    
+
     let total_request_count = set_histogram.len() + get_histogram.len();
     println!("Total request count: {}", total_request_count);
     let tps = total_request_count as f64 / start_time.elapsed().as_secs() as f64;
     println!("TPS: {}", tps);
-    
+
     print_histogram_summary(&set_histogram, "Set");
     print_histogram_summary(&get_histogram, "Get");
 
@@ -84,7 +84,7 @@ async fn run_worker(
 ) -> Result<u32, LoadGenError> {
     let cache_key_string = format!("my-cache-key-{}", worker_id);
     let cache_key = cache_key_string.as_str();
-    
+
     let start_time = std::time::Instant::now();
     let mut i = 0;
     while start_time.elapsed() < run_time {
