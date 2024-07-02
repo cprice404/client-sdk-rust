@@ -450,15 +450,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d231dfb89cfffdbc30e7fc41579ed6066ad03abda9e567ccafae602b97ec5024"
 
 [[package]]
-name = "histogram"
-version = "0.11.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b62b8d85713ddc62e5e78db13bf9f9305610d0419276faa845076a68b7165872"
-dependencies = [
- "thiserror",
-]
-
-[[package]]
 name = "http"
 version = "0.2.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1120,7 +1111,6 @@ name = "rust-loadgen-lambda"
 version = "0.1.0"
 dependencies = [
  "hdrhistogram",
- "histogram",
  "lambda_runtime",
  "lazy_static",
  "momento",

@@ -2,7 +2,6 @@ use std::sync::Arc;
 use std::time::Duration;
 use hdrhistogram::{Histogram, SyncHistogram};
 use hdrhistogram::sync::Recorder;
-// use histogram::{AtomicHistogram};
 use momento::cache::{configurations};
 use momento::{CacheClient, CredentialProvider, MomentoError};
 use thiserror::Error;
@@ -33,11 +32,10 @@ pub async fn run_loadgen() -> Result<(), LoadGenError> {
     cache_client.get(CACHE_NAME, "my-cache-key").await?;
     let cache_client_arc = Arc::new(cache_client);
 
-    // let set_histogram = Arc::new(AtomicHistogram::new(4, 7)?);
     let mut set_histogram: SyncHistogram<u32> = Histogram::<u32>::new(4)?.into();
     let mut get_histogram: SyncHistogram<u32> = Histogram::<u32>::new(4)?.into();
 
-    let num_workers = 100;
+    let num_workers = 200;
     // let num_workers = 1;
     let run_time = Duration::from_secs(30);
     let mut workers_set = JoinSet::new();
