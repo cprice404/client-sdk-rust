@@ -9,13 +9,15 @@
     "test": "jest",
     "lint": "eslint . --ext .ts",
     "format": "eslint . --ext .ts --fix",
-    "driver": "tsc && node ./dist/driver.js"
+    "driver": "tsc && node ./dist/driver.js",
+    "weather-driver": "tsc && node ./dist/weather-driver.js"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
     "@types/aws-lambda": "8.10.118",
     "@types/google-protobuf": "^3.15.6",
+    "@types/line-reader": "0.0.37",
     "@types/node": "^16.11.4",
     "@typescript-eslint/eslint-plugin": "5.30.5",
     "@typescript-eslint/parser": "^5.0.0",
@@ -30,6 +32,7 @@
   "dependencies": {
     "@gomomento/sdk": "^1.92.1",
     "aws-lambda": "1.0.7",
-    "hdr-histogram-js": "^3.0.0"
+    "hdr-histogram-js": "^3.0.0",
+    "line-reader": "0.4.0"
   }
 }
