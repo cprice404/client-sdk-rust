@@ -4,6 +4,7 @@ import line_reader = require('line-reader');
 export class StreamLineReader {
   private readonly readStream: fs.ReadStream;
   private readonly lineReader: Reader;
+  private hasLines = true;
 
   static async open(readStream: fs.ReadStream): Promise<StreamLineReader> {
     const lineReader = await new Promise<Reader>((resolve, reject) => {
@@ -26,7 +27,12 @@ export class StreamLineReader {
 
   readLine(): Promise<string | undefined> {
     return new Promise<string | undefined>((resolve, reject) => {
-      if (this.lineReader.hasNextLine()) {
+      if (!this.hasLines) {
+        resolve(undefined);
+      } else if (!this.lineReader.hasNextLine()) {
+        this.hasLines = false;
+        resolve(undefined);
+      } else {
         this.lineReader.nextLine((err, line) => {
           if (err) {
             reject(err);
@@ -34,8 +40,6 @@ export class StreamLineReader {
             resolve(line);
           }
         });
-      } else {
-        resolve(undefined);
       }
     });
   }
