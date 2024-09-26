@@ -5,9 +5,9 @@ __metadata:
   version: 8
   cacheKey: 10c0
 
-"@gomomento/momento-nodejs-napi-perf-lambda@workspace:.":
+"@gomomento/napi-rs-lib@workspace:.":
   version: 0.0.0-use.local
-  resolution: "@gomomento/momento-nodejs-napi-perf-lambda@workspace:."
+  resolution: "@gomomento/napi-rs-lib@workspace:."
   dependencies:
     "@napi-rs/cli": "npm:^2.18.4"
     ava: "npm:^6.0.1"

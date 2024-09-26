@@ -195,6 +195,5 @@ Cargo.lock
 !.yarn/versions
 
 *.node
-
 index.d.ts
 index.js
