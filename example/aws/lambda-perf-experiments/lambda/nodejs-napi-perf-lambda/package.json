@@ -1,38 +1,38 @@
 {
-  "name": "momento-nodejs-perf-lambda",
-  "version": "1.0.0",
-  "description": "Momento nodejs perf lambda",
-  "main": "index.ts",
-  "scripts": {
-    "prebuild": "eslint . --ext .ts",
-    "build": "tsc",
-    "test": "jest",
-    "lint": "eslint . --ext .ts",
-    "format": "eslint . --ext .ts --fix",
-    "driver": "tsc && node ./dist/driver.js",
-    "weather-driver": "tsc && node ./dist/weather-driver.js"
+  "name": "momento-nodejs-napi-perf-lambda",
+  "version": "0.0.0",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "napi": {
+    "name": "momento-nodejs-napi-perf-lambda",
+    "triples": {
+      "defaults": false,
+      "additional": [
+        "aarch64-apple-darwin",
+        "aarch64-unknown-linux-gnu",
+        "aarch64-unknown-linux-musl"
+      ]
+    }
   },
-  "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "devDependencies": {
-    "@types/aws-lambda": "8.10.118",
-    "@types/google-protobuf": "^3.15.6",
-    "@types/line-reader": "0.0.37",
-    "@types/node": "^16.11.4",
-    "@typescript-eslint/eslint-plugin": "5.30.5",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "8.19.0",
-    "eslint-config-prettier": "8.5.0",
-    "eslint-plugin-import": "2.26.0",
-    "eslint-plugin-node": "11.1.0",
-    "eslint-plugin-prettier": "4.2.1",
-    "prettier": "2.7.1",
-    "typescript": "4.9.5"
+    "@napi-rs/cli": "^2.18.4",
+    "ava": "^6.0.1"
   },
-  "dependencies": {
-    "@gomomento/sdk": "^1.92.1",
-    "aws-lambda": "1.0.7",
-    "hdr-histogram-js": "^3.0.0",
-    "line-reader": "0.4.0"
-  }
+  "ava": {
+    "timeout": "3m"
+  },
+  "engines": {
+    "node": ">= 10"
+  },
+  "scripts": {
+    "artifacts": "napi artifacts",
+    "build": "napi build --platform --release",
+    "build:debug": "napi build --platform",
+    "prepublishOnly": "napi prepublish -t npm",
+    "test": "ava",
+    "universal": "napi universal",
+    "version": "napi version"
+  },
+  "packageManager": "yarn@4.5.0"
 }
