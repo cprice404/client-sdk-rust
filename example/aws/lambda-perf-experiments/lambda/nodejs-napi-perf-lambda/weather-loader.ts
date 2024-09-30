@@ -69,7 +69,7 @@ export async function cacheWeatherData(readStream: fs.ReadStream): Promise<void>
   // const reader = await StreamLineReaderViaLineReaderLib.open(readStream);
   const reader = await StreamLineReaderViaMemory.open(readStream);
 
-  const numWorkers = 20;
+  const numWorkers = 100;
 
   const getLine = () => reader.readLine();
 
