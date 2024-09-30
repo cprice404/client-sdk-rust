@@ -1,10 +1,13 @@
 [package]
-name = "momento-wrapper"
+name = "momento_wrapper"
 version = "0.1.0"
 edition = "2021"
 
+[lib]
+name = "momento_wrapper"
+
 [[bin]]
-name = "momento-wrapper"
+name = "momento_wrapper_hello"
 path = "src/bin/hello.rs"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html

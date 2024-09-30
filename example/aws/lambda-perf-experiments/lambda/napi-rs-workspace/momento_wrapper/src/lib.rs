@@ -30,11 +30,12 @@ impl MomentoCacheWrapper {
         }
     }
     
-    pub async fn set(&self, key: &str, value: &str) {
+    pub async fn set(&self, key: &str, value: &str) -> bool{
         self.cache_client.set(CACHE_NAME, key, value).await.expect("Error when setting value");
+        true
     }
 
-    pub fn close(&self) {
+    pub async fn close(&self) {
         // nothing to do here
     }
 }

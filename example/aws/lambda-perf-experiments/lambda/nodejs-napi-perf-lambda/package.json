@@ -30,10 +30,9 @@
     "typescript": "4.9.5"
   },
   "dependencies": {
-    "@gomomento/napi-rs-lib": "file:../napi-rs-lib",
-    "@gomomento/sdk": "^1.92.1",
     "aws-lambda": "1.0.7",
     "hdr-histogram-js": "^3.0.0",
-    "line-reader": "0.4.0"
+    "line-reader": "0.4.0",
+    "weather_cacher": "file:../napi-rs-workspace/weather_cacher"
   }
 }
