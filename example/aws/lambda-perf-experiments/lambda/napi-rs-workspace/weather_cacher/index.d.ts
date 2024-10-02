@@ -6,6 +6,7 @@
 export declare function sum(a: number, b: number): number
 export declare class WeatherItemCacher {
   static create(): WeatherItemCacher
+  cacheAllWeatherItems(lines: Array<string>): Promise<number>
   set(key: string, value: string): Promise<boolean>
   close(): Promise<void>
 }

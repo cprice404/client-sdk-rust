@@ -49,6 +49,10 @@ export class StreamLineReaderViaLineReaderLib implements StreamLineReader {
     });
   }
 
+  allLines(): Promise<Array<string>> {
+    throw new Error('Not yet implemented');
+  }
+
   close(): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       this.lineReader.close(err => {

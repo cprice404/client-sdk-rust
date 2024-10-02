@@ -31,6 +31,10 @@ export class StreamLineReaderViaMemory implements StreamLineReader {
     return Promise.resolve(this.lines.pop());
   }
 
+  allLines(): Promise<Array<string>> {
+    return Promise.resolve(this.lines);
+  }
+
   close(): Promise<void> {
     return Promise.resolve();
   }
