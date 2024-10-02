@@ -57,15 +57,15 @@ impl MomentoCacheWrapper {
             // const maxTemp = dataPoint.main.temp_max as number;
             let line = &lines[my_next_line];
             let json_value: serde_json::Value = serde_json::from_str(line).unwrap_or_else(|_| panic!("Unable to json deserialize line: {}", line));
-            let city = &json_value["city"]["name"];
+            let _city = &json_value["city"]["name"];
             let min_temp = &json_value["main"]["temp_min"];
             let max_temp = &json_value["main"]["temp_max"];
-            let cache_value = json!({
+            let _cache_value = json!({
                 "minTemp": min_temp,
                 "maxTemp": max_temp,
             });
             // println!("Worker {} deserialized weather data from line; city: {}, value: '{}'", worker_id, city, cache_value);
-            momento_cache_wrapper.next_cache_client().set(CACHE_NAME, city.to_string(), cache_value.to_string()).await.expect("Error storing value to cache!");
+            // momento_cache_wrapper.next_cache_client().set(CACHE_NAME, city.to_string(), cache_value.to_string()).await.expect("Error storing value to cache!");
             num_lines_processed += 1;
             my_next_line = next_line_counter.fetch_add(1, Ordering::Relaxed);
         }
