@@ -10,7 +10,8 @@
     "lint": "eslint . --ext .ts",
     "format": "eslint . --ext .ts --fix",
     "driver": "tsc && node ./dist/driver.js",
-    "weather-driver": "tsc && node ./dist/weather-driver.js"
+    "weather-driver": "tsc && node ./dist/weather-driver.js",
+    "s3-weather-driver": "tsc && node ./dist/s3-weather-driver.js"
   },
   "author": "",
   "license": "ISC",

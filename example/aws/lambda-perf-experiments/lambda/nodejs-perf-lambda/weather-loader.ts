@@ -45,7 +45,7 @@ function startWorkers(
   });
 }
 
-export async function cacheWeatherData(readStream: fs.ReadStream): Promise<void> {
+export async function cacheWeatherData(readStream: NodeJS.ReadableStream): Promise<void> {
   const cacheClient = await CacheClient.create({
     defaultTtlSeconds: 60 * 60,
   });
