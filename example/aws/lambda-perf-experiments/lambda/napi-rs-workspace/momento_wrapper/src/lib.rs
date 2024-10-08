@@ -1,6 +1,6 @@
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::time::Duration;
-
+use momento::cache::SetResponse;
 
 #[derive(Debug)]
 pub struct MomentoCacheWrapper {
@@ -24,7 +24,7 @@ impl MomentoCacheWrapper {
         let clients: Vec<momento::CacheClient> = (0..num_clients)
             .map(|_| {
                 momento::CacheClient::builder()
-                    .default_ttl(Duration::from_secs(60))
+                    .default_ttl(Duration::from_secs(60 * 20))
                     .configuration(momento::cache::configurations::Laptop::latest())
                     .credential_provider(
                         momento::CredentialProvider::from_env_var("MOMENTO_API_KEY".to_string())
@@ -41,6 +41,7 @@ impl MomentoCacheWrapper {
     }
 
     pub async fn set(&self, key: &str, value: &str) -> bool{
+        println!("Cache key: {:?} with value: {:?}", key, value);
         self.next_cache_client().set(CACHE_NAME, key, value).await.expect("Error when setting value");
         true
     }

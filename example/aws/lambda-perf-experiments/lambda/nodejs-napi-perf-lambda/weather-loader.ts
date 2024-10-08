@@ -64,6 +64,7 @@ export async function cacheWeatherData(readStream: NodeJS.ReadableStream): Promi
   //   defaultTtlSeconds: 60 * 60,
   // });
 
+  console.log()
   const cacher = WeatherItemCacher.create();
 
   // const reader = await StreamLineReaderViaLineReaderLib.open(readStream);

@@ -68,7 +68,8 @@ export class MomentoRustLambdaPerfStack extends cdk.Stack {
               // 'ls -l /napi-rs-workspace',
               // 'rustup --help',
               // 'cd /napi-rs-workspace/weather_cacher && yarn build',
-              // `cp -r /napi-rs-workspace/weather_cacher ${path.join(outputDir, 'node_modules')}`,
+              `mkdir -p ${path.join(outputDir, 'node_modules')}`,
+              `cp -r /napi-rs-workspace/weather_cacher ${path.join(outputDir, 'node_modules', 'weather_cacher')}`,
             ];
           },
           afterBundling(): string[] {
