@@ -1,5 +1,5 @@
 import * as fs from 'node:fs';
-import {CacheClient, CacheSetResponse, IMomentoCache} from '@gomomento/sdk';
+import {CacheClient, CacheSetResponse, Configurations, IMomentoCache} from '@gomomento/sdk';
 // import {StreamLineReaderViaLineReaderLib} from './stream-line-reader-via-line-reader-lib';
 import {StreamLineReaderViaMemory} from './stream-line-reader-via-memory';
 
@@ -47,6 +47,7 @@ function startWorkers(
 
 export async function cacheWeatherData(readStream: NodeJS.ReadableStream): Promise<void> {
   const cacheClient = await CacheClient.create({
+    configuration: Configurations.InRegion.Default.latest().withNumConnections(10).withClientTimeoutMillis(20 * 1000),
     defaultTtlSeconds: 60 * 60,
   });
 

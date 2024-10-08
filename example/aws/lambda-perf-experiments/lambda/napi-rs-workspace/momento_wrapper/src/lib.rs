@@ -41,7 +41,7 @@ impl MomentoCacheWrapper {
     }
 
     pub async fn set(&self, key: &str, value: &str) -> bool{
-        println!("Cache key: {:?} with value: {:?}", key, value);
+        // println!("Cache key: {:?} with value: {:?}", key, value);
         self.next_cache_client().set(CACHE_NAME, key, value).await.expect("Error when setting value");
         true
     }

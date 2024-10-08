@@ -34,7 +34,7 @@ export class MomentoRustLambdaPerfStack extends cdk.Stack {
       depsLockFilePath: path.join(__dirname, '../../lambda/nodejs-perf-lambda/package-lock.json'),
       handler: 'handler',
       timeout: cdk.Duration.seconds(300),
-      memorySize: 8192,
+      memorySize: 512,
       environment: {
         MOMENTO_API_KEY: momentoApiKeyParam.valueAsString,
       },
@@ -82,7 +82,7 @@ export class MomentoRustLambdaPerfStack extends cdk.Stack {
       depsLockFilePath: path.join(__dirname, '../../lambda/nodejs-napi-perf-lambda/package-lock.json'),
       handler: 'handler',
       timeout: cdk.Duration.seconds(300),
-      memorySize: 8192,
+      memorySize: 512,
       environment: {
         MOMENTO_API_KEY: momentoApiKeyParam.valueAsString,
       },
