@@ -4,7 +4,7 @@ import * as readline from 'node:readline';
 import * as events from 'node:events';
 
 export class StreamLineReaderViaMemory implements StreamLineReader {
-  static async open(readStream: fs.ReadStream): Promise<StreamLineReader> {
+  static async open(readStream: NodeJS.ReadableStream): Promise<StreamLineReader> {
     const lines: string[] = [];
 
     const rl = readline.createInterface({

@@ -4,6 +4,7 @@
     "module": "commonjs",
     "lib": [
       "es2021",
+      "dom"
     ],
     "declaration": true,
     "strict": true,

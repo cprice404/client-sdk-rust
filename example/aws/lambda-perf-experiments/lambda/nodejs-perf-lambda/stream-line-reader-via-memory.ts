@@ -12,10 +12,13 @@ export class StreamLineReaderViaMemory implements StreamLineReader {
     });
 
     rl.on('line', line => {
+      // console.log(`StreamLineReaderViaMemory: read line: ${line}`);
       lines.push(line);
     });
 
     await events.once(rl, 'close');
+
+    console.log('StreamLineReaderViaMemory: read all lines');
 
     return new StreamLineReaderViaMemory(lines);
   }

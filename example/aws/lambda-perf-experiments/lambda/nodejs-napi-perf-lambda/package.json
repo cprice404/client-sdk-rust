@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "Momento nodejs perf lambda",
   "main": "index.ts",
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "scripts": {
     "prebuild": "eslint . --ext .ts",
     "build": "tsc",

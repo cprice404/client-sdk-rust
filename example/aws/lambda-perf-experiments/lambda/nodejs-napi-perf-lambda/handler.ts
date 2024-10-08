@@ -4,7 +4,6 @@ import {cacheWeatherData} from './weather-loader';
 
 export const handler = async () => {
   try {
-    console.log('Calling fetch to retrieve weather data');
     const response = await fetch('https://napi-rs-demo.s3.us-west-2.amazonaws.com/weather_16.json.gz');
 
     // Convert the web ReadableStream to a Node.js Readable stream
@@ -23,7 +22,6 @@ export const handler = async () => {
 
     const gunzipStream = stream.pipe(zlib.createGunzip());
 
-    console.log('Starting to cache weather data');
     await cacheWeatherData(gunzipStream);
     console.log('Back in main, finished caching weather data');
 

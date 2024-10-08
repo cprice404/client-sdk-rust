@@ -52,13 +52,17 @@ export async function cacheWeatherData(readStream: NodeJS.ReadableStream): Promi
 
   const cache = cacheClient.cache('cache');
 
+  console.log('Cache client created, opening stream reader');
   // const reader = await StreamLineReaderViaLineReaderLib.open(readStream);
   const reader = await StreamLineReaderViaMemory.open(readStream);
+
+  console.log('Stream reader opened');
 
   const numWorkers = 1000;
 
   const getLine = () => reader.readLine();
 
+  console.log(`Starting ${numWorkers} workers`);
   const workerPromises = startWorkers(numWorkers, cache, getLine);
 
   console.log('Waiting for all workers to complete');

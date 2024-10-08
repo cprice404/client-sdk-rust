@@ -15,7 +15,7 @@
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "7.10.0",
-    "aws-cdk": "2.142.1",
+    "aws-cdk": "2.161.1",
     "constructs": "10.3.0",
     "eslint": "8.57.0",
     "eslint-config-prettier": "9.1.0",
@@ -29,7 +29,7 @@
     "typescript": "5.4.5"
   },
   "dependencies": {
-    "aws-cdk-lib": "2.142.1",
+    "aws-cdk-lib": "2.161.1",
     "cargo-lambda-cdk": "0.0.22",
     "source-map-support": "0.5.21"
   }
